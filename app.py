@@ -23,18 +23,26 @@ def main():
     # Upload first file
     st.header("Upload the First File")
     file1 = st.file_uploader("Upload the first CSV file (original file)", type="csv")
+    email_column_file1 = None
     if file1 is not None:
-        file1_data = pd.read_csv(file1)
-        st.write("Columns in the first file:", list(file1_data.columns))
-        email_column_file1 = st.selectbox("Select the email column in the first file", options=list(file1_data.columns))
+        try:
+            file1_data = pd.read_csv(file1)
+            st.write("Columns in the first file:", list(file1_data.columns))
+            email_column_file1 = st.selectbox("Select the email column in the first file", options=list(file1_data.columns))
+        except pd.errors.EmptyDataError:
+            st.error("The first file is empty or invalid. Please upload a valid CSV file.")
 
     # Upload second file
     st.header("Upload the Second File")
     file2 = st.file_uploader("Upload the second CSV file", type="csv")
+    email_column_file2 = None
     if file2 is not None:
-        file2_data = pd.read_csv(file2)
-        st.write("Columns in the second file:", list(file2_data.columns))
-        email_column_file2 = st.selectbox("Select the email column in the second file", options=list(file2_data.columns))
+        try:
+            file2_data = pd.read_csv(file2)
+            st.write("Columns in the second file:", list(file2_data.columns))
+            email_column_file2 = st.selectbox("Select the email column in the second file", options=list(file2_data.columns))
+        except pd.errors.EmptyDataError:
+            st.error("The second file is empty or invalid. Please upload a valid CSV file.")
 
     # Process and download the result
     if file1 is not None and file2 is not None and email_column_file1 and email_column_file2:
