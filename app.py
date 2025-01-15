@@ -6,13 +6,14 @@ def process_files(file1, email_column_file1, file2, email_column_file2):
     file1_data = pd.read_csv(file1)
     file2_data = pd.read_csv(file2)
 
-    # Match email columns and merge data
-    matching_emails = file1_data[email_column_file1].unique()
-    matched_data = file2_data[file2_data[email_column_file2].isin(matching_emails)]
+    # Perform an inner merge to ensure only matching emails are included
+    merged_data = file1_data[[email_column_file1]].merge(
+        file2_data, how="inner", left_on=email_column_file1, right_on=email_column_file2
+    )
 
-    # Select output columns
-    output_columns = [email_column_file2] + [col for col in file2_data.columns if col != email_column_file2]
-    result = matched_data[output_columns]
+    # Select output columns: email from the first file, followed by other columns from the second file
+    output_columns = [email_column_file1] + [col for col in file2_data.columns if col != email_column_file2]
+    result = merged_data[output_columns]
 
     return result
 
