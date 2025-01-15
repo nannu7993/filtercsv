@@ -26,11 +26,14 @@ def main():
     email_column_file1 = None
     if file1 is not None:
         try:
+            file1.seek(0)  # Reset stream position
             file1_data = pd.read_csv(file1)
             st.write("Columns in the first file:", list(file1_data.columns))
             email_column_file1 = st.selectbox("Select the email column in the first file", options=list(file1_data.columns))
         except pd.errors.EmptyDataError:
             st.error("The first file is empty or invalid. Please upload a valid CSV file.")
+        except Exception as e:
+            st.error(f"An error occurred while reading the first file: {str(e)}")
 
     # Upload second file
     st.header("Upload the Second File")
@@ -38,30 +41,38 @@ def main():
     email_column_file2 = None
     if file2 is not None:
         try:
+            file2.seek(0)  # Reset stream position
             file2_data = pd.read_csv(file2)
             st.write("Columns in the second file:", list(file2_data.columns))
             email_column_file2 = st.selectbox("Select the email column in the second file", options=list(file2_data.columns))
         except pd.errors.EmptyDataError:
             st.error("The second file is empty or invalid. Please upload a valid CSV file.")
+        except Exception as e:
+            st.error(f"An error occurred while reading the second file: {str(e)}")
 
     # Process and download the result
     if file1 is not None and file2 is not None and email_column_file1 and email_column_file2:
         st.header("Process and Download")
         if st.button("Generate Output File"):
-            result = process_files(file1, email_column_file1, file2, email_column_file2)
-            st.write("Generated Data Preview:")
-            st.dataframe(result)
+            try:
+                file1.seek(0)  # Reset stream position
+                file2.seek(0)  # Reset stream position
+                result = process_files(file1, email_column_file1, file2, email_column_file2)
+                st.write("Generated Data Preview:")
+                st.dataframe(result)
 
-            # Provide download link
-            output_file_name = "matched_output.csv"
-            result.to_csv(output_file_name, index=False)
-            with open(output_file_name, "rb") as f:
-                st.download_button(
-                    label="Download Output File",
-                    data=f,
-                    file_name=output_file_name,
-                    mime="text/csv"
-                )
+                # Provide download link
+                output_file_name = "matched_output.csv"
+                result.to_csv(output_file_name, index=False)
+                with open(output_file_name, "rb") as f:
+                    st.download_button(
+                        label="Download Output File",
+                        data=f,
+                        file_name=output_file_name,
+                        mime="text/csv"
+                    )
+            except Exception as e:
+                st.error(f"An error occurred during processing: {str(e)}")
 
 if __name__ == "__main__":
     main()
